@@ -74,26 +74,62 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Animated background blobs */}
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated sky live preview background */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        {/* Sun glow */}
         <div
-          className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full opacity-30 blur-3xl animate-blob"
-          style={{ background: "radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)" }}
-        />
-        <div
-          className="absolute top-1/3 -right-40 h-[600px] w-[600px] rounded-full opacity-25 blur-3xl animate-blob"
+          className="absolute top-[8%] right-[12%] h-[320px] w-[320px] rounded-full blur-2xl animate-sun-glow"
           style={{
-            background: "radial-gradient(circle, hsl(var(--accent)) 0%, transparent 70%)",
-            animationDelay: "-6s",
+            background:
+              "radial-gradient(circle, hsl(45 100% 75% / 0.85) 0%, hsl(35 95% 70% / 0.5) 35%, transparent 70%)",
+          }}
+        />
+        {/* Aurora wash */}
+        <div
+          className="absolute inset-0 opacity-70 animate-aurora"
+          style={{ background: "var(--gradient-aurora)", filter: "blur(60px)" }}
+        />
+        {/* Drifting clouds */}
+        <div
+          className="absolute top-[15%] left-[-10%] h-[180px] w-[60%] rounded-full blur-3xl opacity-70 animate-cloud-slow"
+          style={{
+            background:
+              "radial-gradient(ellipse, hsl(0 0% 100% / 0.85) 0%, hsl(0 0% 100% / 0.3) 50%, transparent 75%)",
           }}
         />
         <div
-          className="absolute -bottom-40 left-1/3 h-[500px] w-[500px] rounded-full opacity-20 blur-3xl animate-blob"
+          className="absolute top-[40%] right-[-15%] h-[220px] w-[70%] rounded-full blur-3xl opacity-60 animate-cloud-fast"
           style={{
-            background: "radial-gradient(circle, hsl(217 91% 70%) 0%, transparent 70%)",
-            animationDelay: "-12s",
+            background:
+              "radial-gradient(ellipse, hsl(0 0% 100% / 0.75) 0%, hsl(210 40% 95% / 0.3) 50%, transparent 75%)",
           }}
+        />
+        <div
+          className="absolute bottom-[10%] left-[20%] h-[200px] w-[55%] rounded-full blur-3xl opacity-55 animate-cloud-slow"
+          style={{
+            background:
+              "radial-gradient(ellipse, hsl(30 50% 92% / 0.7) 0%, hsl(30 40% 88% / 0.3) 50%, transparent 75%)",
+            animationDelay: "-10s",
+          }}
+        />
+        {/* Distant warm horizon haze */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-[35%]"
+          style={{
+            background:
+              "linear-gradient(to top, hsl(30 50% 82% / 0.6) 0%, hsl(35 60% 86% / 0.3) 50%, transparent 100%)",
+          }}
+        />
+        {/* Twinkling highlights */}
+        <div className="absolute top-[20%] left-[30%] h-1.5 w-1.5 rounded-full bg-white animate-star-twinkle" />
+        <div
+          className="absolute top-[35%] left-[70%] h-1 w-1 rounded-full bg-white animate-star-twinkle"
+          style={{ animationDelay: "-1s" }}
+        />
+        <div
+          className="absolute top-[55%] left-[15%] h-1.5 w-1.5 rounded-full bg-white animate-star-twinkle"
+          style={{ animationDelay: "-2s" }}
         />
       </div>
 
