@@ -6,33 +6,39 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 30% 10%;
+    --background: 214 60% 97%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 30% 10%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 10%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 250 84% 54%;
+    --primary: 217 91% 55%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 199 95% 64%;
 
-    --secondary: 220 14% 94%;
-    --secondary-foreground: 220 30% 20%;
+    --secondary: 214 32% 92%;
+    --secondary-foreground: 222 47% 20%;
 
-    --muted: 220 14% 94%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 214 32% 93%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 168 76% 42%;
+    --accent: 199 95% 60%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 14% 90%;
-    --input: 220 14% 90%;
-    --ring: 250 84% 54%;
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 217 91% 55%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 55%), hsl(199 95% 64%));
+    --gradient-bg: radial-gradient(ellipse at top, hsl(214 90% 92%) 0%, hsl(214 60% 97%) 50%);
+    --shadow-blue: 0 20px 60px -15px hsl(217 91% 55% / 0.35);
+    --shadow-blue-sm: 0 10px 30px -10px hsl(217 91% 55% / 0.3);
 
     --radius: 0.75rem;
 
@@ -54,33 +60,39 @@
   }
 
   .dark {
-    --background: 224 30% 8%;
-    --foreground: 210 20% 92%;
+    --background: 222 47% 6%;
+    --foreground: 210 40% 96%;
 
-    --card: 224 25% 12%;
-    --card-foreground: 210 20% 92%;
+    --card: 222 47% 10%;
+    --card-foreground: 210 40% 96%;
 
-    --popover: 224 25% 12%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 40% 96%;
 
-    --primary: 250 84% 60%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 199 95% 70%;
 
-    --secondary: 224 20% 18%;
-    --secondary-foreground: 210 20% 85%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 90%;
 
-    --muted: 224 20% 18%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 168 76% 42%;
+    --accent: 199 95% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 40%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 224 20% 20%;
-    --input: 224 20% 20%;
-    --ring: 250 84% 60%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 217 91% 60%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(199 95% 70%));
+    --gradient-bg: radial-gradient(ellipse at top, hsl(222 47% 12%) 0%, hsl(222 47% 6%) 50%);
+    --shadow-blue: 0 20px 60px -15px hsl(217 91% 60% / 0.5);
+    --shadow-blue-sm: 0 10px 30px -10px hsl(217 91% 60% / 0.4);
 
     --success: 152 60% 44%;
     --success-foreground: 0 0% 100%;
@@ -107,9 +119,68 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
+    background-image: var(--gradient-bg);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
   }
+}
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .text-gradient-blue {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .shadow-blue {
+    box-shadow: var(--shadow-blue);
+  }
+  .shadow-blue-sm {
+    box-shadow: var(--shadow-blue-sm);
+  }
+}
+
+@keyframes float-3d {
+  0%, 100% {
+    transform: translateY(0) rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+  }
+  50% {
+    transform: translateY(-5px) rotateX(-3deg) rotateY(8deg);
+  }
+  75% {
+    transform: translateY(-12px) rotateX(4deg) rotateY(-5deg);
+  }
+}
+
+@keyframes blob-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 30px) scale(0.95); }
+}
+
+@keyframes shimmer-border {
+  0%, 100% { opacity: 0.5; transform: rotate(0deg); }
+  50% { opacity: 1; transform: rotate(180deg); }
+}
+
+.animate-float-3d {
+  animation: float-3d 6s ease-in-out infinite;
+}
+.animate-blob {
+  animation: blob-drift 18s ease-in-out infinite;
+}
+.animate-shimmer-border {
+  animation: shimmer-border 8s linear infinite;
 }
