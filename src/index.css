@@ -6,10 +6,10 @@
 
 @layer base {
   :root {
-    --background: 214 60% 97%;
+    --background: 215 40% 88%;
     --foreground: 222 47% 11%;
 
-    --card: 0 0% 100%;
+    --card: 210 40% 98%;
     --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
@@ -36,7 +36,9 @@
     --ring: 217 91% 55%;
 
     --gradient-primary: linear-gradient(135deg, hsl(217 91% 55%), hsl(199 95% 64%));
-    --gradient-bg: radial-gradient(ellipse at top, hsl(214 90% 92%) 0%, hsl(214 60% 97%) 50%);
+    --gradient-bg: linear-gradient(180deg, hsl(205 80% 72%) 0%, hsl(199 75% 80%) 35%, hsl(195 60% 86%) 65%, hsl(30 40% 88%) 100%);
+    --gradient-sky: linear-gradient(180deg, hsl(210 85% 65%) 0%, hsl(200 80% 78%) 40%, hsl(35 60% 86%) 100%);
+    --gradient-aurora: linear-gradient(120deg, hsl(217 91% 60% / 0.4), hsl(280 70% 65% / 0.3), hsl(180 70% 60% / 0.35));
     --shadow-blue: 0 20px 60px -15px hsl(217 91% 55% / 0.35);
     --shadow-blue-sm: 0 10px 30px -10px hsl(217 91% 55% / 0.3);
 
@@ -118,9 +120,10 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body antialiased;
-    background-image: var(--gradient-bg);
+    @apply text-foreground font-body antialiased;
+    background: var(--gradient-bg);
     background-attachment: fixed;
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -184,3 +187,34 @@
 .animate-shimmer-border {
   animation: shimmer-border 8s linear infinite;
 }
+
+/* Animated sky background layers */
+@keyframes cloud-drift-slow {
+  0% { transform: translateX(-10%) translateY(0); }
+  50% { transform: translateX(10%) translateY(-20px); }
+  100% { transform: translateX(-10%) translateY(0); }
+}
+@keyframes cloud-drift-fast {
+  0% { transform: translateX(15%) translateY(0); }
+  50% { transform: translateX(-15%) translateY(15px); }
+  100% { transform: translateX(15%) translateY(0); }
+}
+@keyframes aurora-shift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  33% { transform: translate(5%, -3%) scale(1.1); opacity: 0.8; }
+  66% { transform: translate(-4%, 4%) scale(0.95); opacity: 0.5; }
+}
+@keyframes sun-glow {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.animate-cloud-slow { animation: cloud-drift-slow 40s ease-in-out infinite; }
+.animate-cloud-fast { animation: cloud-drift-fast 28s ease-in-out infinite; }
+.animate-aurora { animation: aurora-shift 20s ease-in-out infinite; }
+.animate-sun-glow { animation: sun-glow 6s ease-in-out infinite; }
+.animate-star-twinkle { animation: star-twinkle 3s ease-in-out infinite; }
