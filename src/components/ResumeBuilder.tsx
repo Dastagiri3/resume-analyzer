@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Wand2, Copy, Download, Sparkles, Target, AlertCircle, Upload, FileText, X, Loader2 } from "lucide-react";
+import { Wand2, Copy, Download, Sparkles, Target, AlertCircle, Upload, FileText, X, Loader2, FileDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { buildResume, type BuilderProfile, type BuilderResult } from "@/lib/resumeBuilder";
 import { extractTextFromPDF } from "@/lib/pdfParser";
+import { TEMPLATES, renderResumePdf, type TemplateId } from "@/lib/resumeTemplates";
 
 const EMPTY: BuilderProfile = {
   fullName: "",
