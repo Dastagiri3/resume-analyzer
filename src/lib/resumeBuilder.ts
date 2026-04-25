@@ -99,6 +99,9 @@ export function buildResume(
     jdSkills: Array.from(jdSkillSet),
     userSkills: Array.from(userSkillSet),
     alignmentScore,
+    targetTitle,
+    tailoredSummary,
+    resumeSkills: skillsForResume,
   };
 }
 
