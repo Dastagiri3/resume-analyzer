@@ -25,6 +25,10 @@ export interface BuilderResult {
   jdSkills: string[];
   userSkills: string[];
   alignmentScore: number; // 0-100
+  // Structured fields needed by PDF templates
+  targetTitle: string;
+  tailoredSummary: string;
+  resumeSkills: string[];
 }
 
 /**
