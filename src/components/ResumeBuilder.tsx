@@ -36,6 +36,7 @@ const ResumeBuilder = () => {
   const [profile, setProfile] = useState<BuilderProfile>(EMPTY);
   const [result, setResult] = useState<BuilderResult | null>(null);
   const [building, setBuilding] = useState(false);
+  const [template, setTemplate] = useState<TemplateId>("modern");
   const jdFileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
