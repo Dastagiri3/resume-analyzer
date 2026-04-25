@@ -1,12 +1,14 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, RotateCcw } from "lucide-react";
+import { Sparkles, RotateCcw, FileSearch, Wand2 } from "lucide-react";
 import ResumeUpload from "@/components/ResumeUpload";
 import AnalysisDashboard from "@/components/AnalysisDashboard";
+import ResumeBuilder from "@/components/ResumeBuilder";
 import { extractTextFromPDF } from "@/lib/pdfParser";
 import { analyzeResume, matchJobs } from "@/lib/resumeAnalyzer";
 import type { AnalysisResult, JobMatch } from "@/lib/resumeAnalyzer";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 
 /**
@@ -170,7 +172,7 @@ const Index = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-10"
+              className="flex flex-col items-center gap-8"
             >
               <div className="text-center max-w-xl">
                 <motion.div
@@ -180,14 +182,14 @@ const Index = () => {
                   className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 mb-5 backdrop-blur-sm"
                 >
                   <span className="h-2 w-2 rounded-full bg-primary animate-pulse-glow" />
-                  <span className="text-xs font-medium text-primary">AI-Powered Analysis</span>
+                  <span className="text-xs font-medium text-primary">AI-Powered Analysis & Builder</span>
                 </motion.div>
                 <motion.h2
                   className="font-heading text-4xl md:text-5xl font-bold mb-4 leading-tight"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  Analyze Your <span className="text-gradient-blue">Resume</span>
+                  Build & Analyze Your <span className="text-gradient-blue">Resume</span>
                 </motion.h2>
                 <motion.p
                   className="text-muted-foreground text-base md:text-lg"
@@ -195,11 +197,27 @@ const Index = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.15 }}
                 >
-                  Upload a PDF resume to get an instant score, skill extraction,
-                  and personalized job matches powered by AI.
+                  Upload a PDF for an instant score, or craft a tailored resume
+                  directly from any job description.
                 </motion.p>
               </div>
-              <ResumeUpload onFileSelect={handleFileSelect} isLoading={isLoading} />
+
+              <Tabs defaultValue="analyze" className="w-full max-w-6xl">
+                <TabsList className="mx-auto grid w-full max-w-md grid-cols-2 bg-card/60 backdrop-blur-xl">
+                  <TabsTrigger value="analyze" className="gap-1.5">
+                    <FileSearch className="h-4 w-4" /> Analyze
+                  </TabsTrigger>
+                  <TabsTrigger value="build" className="gap-1.5">
+                    <Wand2 className="h-4 w-4" /> Build from JD
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="analyze" className="mt-8 flex justify-center">
+                  <ResumeUpload onFileSelect={handleFileSelect} isLoading={isLoading} />
+                </TabsContent>
+                <TabsContent value="build" className="mt-8">
+                  <ResumeBuilder />
+                </TabsContent>
+              </Tabs>
             </motion.div>
           ) : (
             <motion.div
