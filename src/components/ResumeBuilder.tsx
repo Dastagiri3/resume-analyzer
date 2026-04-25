@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Wand2, Copy, Download, Sparkles, Target, AlertCircle } from "lucide-react";
+import { Wand2, Copy, Download, Sparkles, Target, AlertCircle, Upload, FileText, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { buildResume, type BuilderProfile, type BuilderResult } from "@/lib/resumeBuilder";
+import { extractTextFromPDF } from "@/lib/pdfParser";
 
 const EMPTY: BuilderProfile = {
   fullName: "",
@@ -29,14 +30,75 @@ const EMPTY: BuilderProfile = {
  */
 const ResumeBuilder = () => {
   const [jd, setJd] = useState("");
+  const [jdFileName, setJdFileName] = useState<string | null>(null);
+  const [jdLoading, setJdLoading] = useState(false);
   const [profile, setProfile] = useState<BuilderProfile>(EMPTY);
   const [result, setResult] = useState<BuilderResult | null>(null);
   const [building, setBuilding] = useState(false);
+  const jdFileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const update = (k: keyof BuilderProfile) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => setProfile((p) => ({ ...p, [k]: e.target.value }));
+
+  const handleJdFile = async (file: File) => {
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    const isTxt = file.type.startsWith("text/") || /\.(txt|md)$/i.test(file.name);
+    if (!isPdf && !isTxt) {
+      toast({
+        title: "Unsupported file",
+        description: "Please upload a PDF, TXT, or MD file.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 10MB.", variant: "destructive" });
+      return;
+    }
+    setJdLoading(true);
+    try {
+      const text = isPdf ? await extractTextFromPDF(file) : await file.text();
+      if (!text.trim()) {
+        toast({
+          title: "No text found",
+          description: "The file appears empty or image-only.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setJd(text);
+      setJdFileName(file.name);
+      toast({ title: "Job description loaded", description: file.name });
+    } catch (err) {
+      console.error("JD parse failed:", err);
+      toast({
+        title: "Parse failed",
+        description: "Could not read the file. Try another.",
+        variant: "destructive",
+      });
+    } finally {
+      setJdLoading(false);
+    }
+  };
+
+  const handleJdInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) handleJdFile(f);
+    e.target.value = "";
+  };
+
+  const handleJdDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const f = e.dataTransfer.files?.[0];
+    if (f) handleJdFile(f);
+  };
+
+  const clearJd = () => {
+    setJd("");
+    setJdFileName(null);
+  };
 
   const handleBuild = async () => {
     if (!jd.trim()) {
