@@ -136,15 +136,44 @@ const ResumeBuilder = () => {
     toast({ title: "Copied to clipboard" });
   };
 
-  const handleDownload = () => {
+  const baseFilename = () =>
+    `${(profile.fullName || "resume").replace(/\s+/g, "_")}_resume`;
+
+  const handleDownloadMd = () => {
     if (!result) return;
     const blob = new Blob([result.markdown], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${(profile.fullName || "resume").replace(/\s+/g, "_")}_resume.md`;
+    a.download = `${baseFilename()}.md`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPdf = () => {
+    if (!result) return;
+    try {
+      const blob = renderResumePdf(template, {
+        profile,
+        targetTitle: result.targetTitle,
+        summary: result.tailoredSummary,
+        skills: result.resumeSkills,
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${baseFilename()}_${template}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "PDF downloaded", description: `${template} template` });
+    } catch (err) {
+      console.error("PDF render failed:", err);
+      toast({
+        title: "PDF failed",
+        description: "Could not generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
