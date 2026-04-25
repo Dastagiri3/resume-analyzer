@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Wand2, Copy, Download, Sparkles, Target, AlertCircle, Upload, FileText, X, Loader2 } from "lucide-react";
+import { Wand2, Copy, Download, Sparkles, Target, AlertCircle, Upload, FileText, X, Loader2, FileDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { buildResume, type BuilderProfile, type BuilderResult } from "@/lib/resumeBuilder";
 import { extractTextFromPDF } from "@/lib/pdfParser";
+import { TEMPLATES, renderResumePdf, type TemplateId } from "@/lib/resumeTemplates";
 
 const EMPTY: BuilderProfile = {
   fullName: "",
@@ -35,6 +36,7 @@ const ResumeBuilder = () => {
   const [profile, setProfile] = useState<BuilderProfile>(EMPTY);
   const [result, setResult] = useState<BuilderResult | null>(null);
   const [building, setBuilding] = useState(false);
+  const [template, setTemplate] = useState<TemplateId>("modern");
   const jdFileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -134,15 +136,44 @@ const ResumeBuilder = () => {
     toast({ title: "Copied to clipboard" });
   };
 
-  const handleDownload = () => {
+  const baseFilename = () =>
+    `${(profile.fullName || "resume").replace(/\s+/g, "_")}_resume`;
+
+  const handleDownloadMd = () => {
     if (!result) return;
     const blob = new Blob([result.markdown], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${(profile.fullName || "resume").replace(/\s+/g, "_")}_resume.md`;
+    a.download = `${baseFilename()}.md`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPdf = () => {
+    if (!result) return;
+    try {
+      const blob = renderResumePdf(template, {
+        profile,
+        targetTitle: result.targetTitle,
+        summary: result.tailoredSummary,
+        skills: result.resumeSkills,
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${baseFilename()}_${template}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "PDF downloaded", description: `${template} template` });
+    } catch (err) {
+      console.error("PDF render failed:", err);
+      toast({
+        title: "PDF failed",
+        description: "Could not generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -287,12 +318,60 @@ const ResumeBuilder = () => {
                   <Button size="sm" variant="outline" onClick={handleCopy} className="gap-1.5">
                     <Copy className="h-3.5 w-3.5" /> Copy
                   </Button>
-                  <Button size="sm" variant="outline" onClick={handleDownload} className="gap-1.5">
+                  <Button size="sm" variant="outline" onClick={handleDownloadMd} className="gap-1.5">
                     <Download className="h-3.5 w-3.5" /> .md
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleDownloadPdf}
+                    className="gap-1.5"
+                    style={{ background: "var(--gradient-primary)" }}
+                  >
+                    <FileDown className="h-3.5 w-3.5" /> Download PDF
                   </Button>
                 </div>
               </div>
               <Progress value={result.alignmentScore} className="h-2" />
+
+              {/* Template picker */}
+              <div className="mt-5">
+                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                  Choose a template
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {TEMPLATES.map((t) => {
+                    const active = template === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setTemplate(t.id)}
+                        className={`relative text-left rounded-lg border p-2.5 transition-all ${
+                          active
+                            ? "border-primary ring-2 ring-primary/30 bg-primary/5"
+                            : "border-border/60 hover:border-primary/40 hover:bg-primary/5"
+                        }`}
+                      >
+                        {active && (
+                          <span className="absolute top-1.5 right-1.5 rounded-full bg-primary text-primary-foreground p-0.5">
+                            <Check className="h-3 w-3" />
+                          </span>
+                        )}
+                        <div
+                          className="h-12 rounded-md mb-2 border border-border/40"
+                          style={{
+                            background: `linear-gradient(135deg, ${t.accent} 0%, ${t.accent}cc 100%)`,
+                          }}
+                        />
+                        <p className="text-xs font-semibold leading-tight">{t.name}</p>
+                        <p className="text-[10px] text-muted-foreground leading-snug mt-0.5 line-clamp-2">
+                          {t.description}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
               <div className="mt-4 space-y-3">
                 <div>

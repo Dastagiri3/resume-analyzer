@@ -25,6 +25,10 @@ export interface BuilderResult {
   jdSkills: string[];
   userSkills: string[];
   alignmentScore: number; // 0-100
+  // Structured fields needed by PDF templates
+  targetTitle: string;
+  tailoredSummary: string;
+  resumeSkills: string[];
 }
 
 /**
@@ -95,6 +99,9 @@ export function buildResume(
     jdSkills: Array.from(jdSkillSet),
     userSkills: Array.from(userSkillSet),
     alignmentScore,
+    targetTitle,
+    tailoredSummary,
+    resumeSkills: skillsForResume,
   };
 }
 
