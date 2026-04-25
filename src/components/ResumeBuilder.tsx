@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Wand2, Copy, Download, Sparkles, Target, AlertCircle } from "lucide-react";
+import { Wand2, Copy, Download, Sparkles, Target, AlertCircle, Upload, FileText, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { buildResume, type BuilderProfile, type BuilderResult } from "@/lib/resumeBuilder";
+import { extractTextFromPDF } from "@/lib/pdfParser";
 
 const EMPTY: BuilderProfile = {
   fullName: "",
@@ -29,14 +30,75 @@ const EMPTY: BuilderProfile = {
  */
 const ResumeBuilder = () => {
   const [jd, setJd] = useState("");
+  const [jdFileName, setJdFileName] = useState<string | null>(null);
+  const [jdLoading, setJdLoading] = useState(false);
   const [profile, setProfile] = useState<BuilderProfile>(EMPTY);
   const [result, setResult] = useState<BuilderResult | null>(null);
   const [building, setBuilding] = useState(false);
+  const jdFileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const update = (k: keyof BuilderProfile) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => setProfile((p) => ({ ...p, [k]: e.target.value }));
+
+  const handleJdFile = async (file: File) => {
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    const isTxt = file.type.startsWith("text/") || /\.(txt|md)$/i.test(file.name);
+    if (!isPdf && !isTxt) {
+      toast({
+        title: "Unsupported file",
+        description: "Please upload a PDF, TXT, or MD file.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 10MB.", variant: "destructive" });
+      return;
+    }
+    setJdLoading(true);
+    try {
+      const text = isPdf ? await extractTextFromPDF(file) : await file.text();
+      if (!text.trim()) {
+        toast({
+          title: "No text found",
+          description: "The file appears empty or image-only.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setJd(text);
+      setJdFileName(file.name);
+      toast({ title: "Job description loaded", description: file.name });
+    } catch (err) {
+      console.error("JD parse failed:", err);
+      toast({
+        title: "Parse failed",
+        description: "Could not read the file. Try another.",
+        variant: "destructive",
+      });
+    } finally {
+      setJdLoading(false);
+    }
+  };
+
+  const handleJdInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) handleJdFile(f);
+    e.target.value = "";
+  };
+
+  const handleJdDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const f = e.dataTransfer.files?.[0];
+    if (f) handleJdFile(f);
+  };
+
+  const clearJd = () => {
+    setJd("");
+    setJdFileName(null);
+  };
 
   const handleBuild = async () => {
     if (!jd.trim()) {
@@ -100,11 +162,60 @@ const ResumeBuilder = () => {
           </div>
           <h3 className="font-heading text-lg font-semibold">Job Description</h3>
         </div>
+
+        {/* Upload / drag-drop area */}
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={handleJdDrop}
+          className="rounded-lg border-2 border-dashed border-border/70 bg-background/40 hover:border-primary/50 hover:bg-primary/5 transition-colors p-3 flex items-center justify-between gap-3"
+        >
+          <input
+            ref={jdFileInputRef}
+            type="file"
+            accept=".pdf,.txt,.md,application/pdf,text/plain"
+            className="hidden"
+            onChange={handleJdInputChange}
+          />
+          {jdFileName ? (
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <FileText className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm truncate">{jdFileName}</span>
+              <Button size="icon" variant="ghost" onClick={clearJd} className="h-7 w-7 shrink-0">
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+              {jdLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+              ) : (
+                <Upload className="h-4 w-4 shrink-0" />
+              )}
+              <span className="truncate">
+                {jdLoading ? "Reading file…" : "Drop a JD file here, or"}
+              </span>
+            </div>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => jdFileInputRef.current?.click()}
+            disabled={jdLoading}
+            className="gap-1.5 shrink-0"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Upload PDF
+          </Button>
+        </div>
+
         <Textarea
           value={jd}
-          onChange={(e) => setJd(e.target.value)}
-          placeholder="Paste the full job description here…"
-          className="min-h-[160px] resize-y"
+          onChange={(e) => {
+            setJd(e.target.value);
+            if (jdFileName) setJdFileName(null);
+          }}
+          placeholder="…or paste the full job description here."
+          className="min-h-[140px] resize-y"
         />
 
         <div className="border-t border-border/50 pt-4 space-y-3">
